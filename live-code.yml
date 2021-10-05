@@ -1,0 +1,45 @@
+# Deployment for App A
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: livecode-deployment
+spec:
+    selector:
+        matchLabels:
+            app: livecode
+    replicas: 2
+    template:
+        metadata:
+            labels:
+                app: livecode
+        spec:
+            containers:
+                - name: livecode
+                  image: livecode-service:1.0
+                  ports:
+                      - containerPort: 9080
+                      - containerPort: 9443
+                  env:
+                      - name: mp_config_profile
+                        value: "prod"
+                      - name: _dev_discount
+                        value: "88"
+---
+
+# Service for App A (exposes HTTP on port 30080)
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: livecode-service
+spec:
+  externalTrafficPolicy: Cluster
+  ports:
+  - nodePort: 30081
+    port: 9080
+    protocol: TCP
+    targetPort: 9080
+  selector:
+    app: livecode
+  type: NodePort
